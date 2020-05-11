@@ -18,12 +18,16 @@
   },
   "type": "module",
   "author": "Kirill Drozdov",
+  "jest": {
+    "testEnvironment": "node"
+  },
   "bugs": {
     "url": "https://github.com/kmdrozdov/frontend-project-lvl2/issues"
   },
   "homepage": "https://github.com/kmdrozdov/frontend-project-lvl2#readme",
   "dependencies": {
     "commander": "^5.1.0",
+    "js-yaml": "^3.13.1",
     "lodash": "^4.17.15"
   },
   "devDependencies": {

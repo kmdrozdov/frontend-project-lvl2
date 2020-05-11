@@ -6,4 +6,4 @@
 
 ## Пример работы программы *gendiff*
 
-[![asciicast](https://asciinema.org/a/VZJTyIzrwYAe0Bjjg3vE58EnI.svg)](https://asciinema.org/a/VZJTyIzrwYAe0Bjjg3vE58EnI) 
+[![asciicast](https://asciinema.org/a/SQZHFKs6XHndjSyIYVRX6OoCv.svg)](https://asciinema.org/a/SQZHFKs6XHndjSyIYVRX6OoCv) 

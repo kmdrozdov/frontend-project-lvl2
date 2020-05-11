@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, extname } from 'path';
 import _ from 'lodash';
+import parser from './parser/index.js';
 
 export default (filepath1, filepath2) => {
   const currDir = process.cwd();
@@ -8,9 +9,11 @@ export default (filepath1, filepath2) => {
   const resolvedPathToFile2 = resolve(currDir, filepath2);
   const file1 = readFileSync(resolvedPathToFile1).toString('utf-8');
   const file2 = readFileSync(resolvedPathToFile2).toString('utf-8');
+  const extension = extname(resolvedPathToFile1);
+  const parserFunc = parser(extension);
 
-  const parsedFile1 = JSON.parse(file1);
-  const parsedFile2 = JSON.parse(file2);
+  const parsedFile1 = parserFunc(file1);
+  const parsedFile2 = parserFunc(file2);
 
   const mergedKeys = _.uniq([...Object.keys(parsedFile1), ...Object.keys(parsedFile2)]);
   const reducedResults = mergedKeys.reduce(
