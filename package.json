@@ -22,5 +22,12 @@
   "dependencies": {
     "commander": "^5.1.0",
     "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@jest/globals": "^26.0.1",
+    "eslint": "^7.0.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "jest": "^26.0.1"
   }
 }

@@ -19,7 +19,7 @@ export default (filepath1, filepath2) => {
         acc.push(`  ${key}: ${parsedFile1[key]}`);
       } else {
         if (typeof parsedFile1[key] !== 'undefined') {
-          acc.push(`+ ${key}: ${parsedFile1[key]}`)
+          acc.push(`+ ${key}: ${parsedFile1[key]}`);
         }
 
         if (typeof parsedFile2[key] !== 'undefined') {
@@ -29,9 +29,9 @@ export default (filepath1, filepath2) => {
 
       return acc;
     },
-    []
+    [],
   );
-  const diff = reducedResults.map(item => `  ${item}`).join('\n');
+  const diff = reducedResults.map((item) => `  ${item}`).join('\n');
 
-  console.log(`{\n${diff}\n}`);
+  return `{\n${diff}\n}`;
 };
