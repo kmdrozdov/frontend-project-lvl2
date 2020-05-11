@@ -1,5 +1,6 @@
 # frontend-project-lvl2
 
+[![github action status](https://github.com/kmdrozdov/frontend-project-lvl2/workflows/CI/badge.svg)](https://github.com/kmdrozdov/frontend-project-lvl2/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/8254f1b2b62040b80efd/maintainability)](https://codeclimate.com/github/kmdrozdov/frontend-project-lvl2/maintainability)
 
 ## Пример работы программы *gendiff*

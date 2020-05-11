@@ -9,6 +9,6 @@ program
   .description('Compares two configuration files and shows a difference.')
   .option('-f, --format [type]', 'output format')
   .action((arg1, arg2) => {
-    gendiff(arg1, arg2);
+    console.log(gendiff(arg1, arg2));
   })
   .parse(process.argv);
