@@ -1,6 +1,6 @@
 import { beforeAll, expect, test } from '@jest/globals';
 import { readFileSync } from 'fs';
-import gendiff from '../src/index.js';
+import genDiff from '../src/index.js';
 
 let afterJSON;
 let beforeJSON;
@@ -21,14 +21,14 @@ beforeAll(() => {
   result = readFileSync('./__fixtures__/result.txt', 'utf-8');
 });
 
-test('Different files - JSON', () => {
-  expect(gendiff(beforeJSON, afterJSON)).toBe(result);
+test('JSON', () => {
+  expect(genDiff(beforeJSON, afterJSON, 'stylish')).toBe(result);
 });
 
-test('Different files - YAML', () => {
-  expect(gendiff(beforeYAML, afterYAML)).toBe(result);
+test('YAML', () => {
+  expect(genDiff(beforeYAML, afterYAML, 'stylish')).toBe(result);
 });
 
-test('Different files - INI', () => {
-  expect(gendiff(beforeINI, afterINI)).toBe(result);
+test('INI', () => {
+  expect(genDiff(beforeINI, afterINI, 'stylish')).toBe(result);
 });
