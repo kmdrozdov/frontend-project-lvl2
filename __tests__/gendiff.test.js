@@ -1,63 +1,39 @@
-import { beforeAll, expect, test } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
+import { join } from 'path';
 import { readFileSync } from 'fs';
 import genDiff from '../src/index.js';
 
-let afterJSON;
-let beforeJSON;
-let afterYAML;
-let beforeYAML;
-let afterINI;
-let beforeINI;
+const getFixturesPath = (filename) => join('__fixtures__', filename);
+const readFile = (fileName) => readFileSync(getFixturesPath(fileName), 'utf-8');
 
-let jsonResult;
-let stylishResult;
-let plainResult;
+const afterJSON = getFixturesPath('after.json');
+const beforeJSON = getFixturesPath('before.json');
+const afterYAML = getFixturesPath('after.yml');
+const beforeYAML = getFixturesPath('before.yml');
+const afterINI = getFixturesPath('after.ini');
+const beforeINI = getFixturesPath('before.ini');
 
-beforeAll(() => {
-  afterJSON = './__fixtures__/after.json';
-  beforeJSON = './__fixtures__/before.json';
-  afterYAML = './__fixtures__/after.yml';
-  beforeYAML = './__fixtures__/before.yml';
-  afterINI = './__fixtures__/after.ini';
-  beforeINI = './__fixtures__/before.ini';
+const jsonResult = readFile('result.json');
+const plainResult = readFile('plain_result.txt');
+const stylishResult = readFile('stylish_result.txt');
 
-  jsonResult = readFileSync('./__fixtures__/result.json', 'utf-8');
-  plainResult = readFileSync('./__fixtures__/plain_result.txt', 'utf-8');
-  stylishResult = readFileSync('./__fixtures__/stylish_result.txt', 'utf-8');
-});
+const cases = [
+  ['stylish', beforeJSON, afterJSON, stylishResult],
+  ['stylish', beforeYAML, afterYAML, stylishResult],
+  ['stylish', beforeINI, afterINI, stylishResult],
+  ['plain', beforeJSON, afterJSON, plainResult],
+  ['plain', beforeYAML, afterYAML, plainResult],
+  ['plain', beforeINI, afterINI, plainResult],
+  ['json', beforeJSON, afterJSON, jsonResult],
+  ['json', beforeYAML, afterYAML, jsonResult],
+  ['json', beforeINI, afterINI, jsonResult],
+];
 
-test('JSON, stylish format', () => {
-  expect(genDiff(beforeJSON, afterJSON, 'stylish')).toBe(stylishResult);
-});
-
-test('YAML, stylish format', () => {
-  expect(genDiff(beforeYAML, afterYAML, 'stylish')).toBe(stylishResult);
-});
-
-test('INI, stylish format', () => {
-  expect(genDiff(beforeINI, afterINI, 'stylish')).toBe(stylishResult);
-});
-
-test('JSON, plain format', () => {
-  expect(genDiff(beforeJSON, afterJSON, 'plain')).toBe(plainResult);
-});
-
-test('YAML, plain format', () => {
-  expect(genDiff(beforeYAML, afterYAML, 'plain')).toBe(plainResult);
-});
-
-test('INI, plain format', () => {
-  expect(genDiff(beforeINI, afterINI, 'plain')).toBe(plainResult);
-});
-
-test('JSON, json format', () => {
-  expect(genDiff(beforeJSON, afterJSON, 'json')).toBe(jsonResult);
-});
-
-test('YAML, json format', () => {
-  expect(genDiff(beforeYAML, afterYAML, 'json')).toBe(jsonResult);
-});
-
-test('INI, json format', () => {
-  expect(genDiff(beforeINI, afterINI, 'json')).toBe(jsonResult);
+describe('Main cases', () => {
+  test.each(cases)(
+    'Case for "%s" format',
+    (format, before, after, result) => {
+      expect(genDiff(before, after, format)).toBe(result);
+    },
+  );
 });

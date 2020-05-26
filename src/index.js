@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { resolve, extname } from 'path';
 import _ from 'lodash';
 import formatterFabric from './formatter/index.js';
-import parser from './parser/index.js';
+import parserFabric from './parser.js';
 
 const genDiffTree = (tree1, tree2) => {
   const mergedKeys = _.uniq([...Object.keys(tree1), ...Object.keys(tree2)]).sort();
@@ -35,12 +35,12 @@ export default (filepath1, filepath2, format) => {
   const resolvedPathToFile2 = resolve(currDir, filepath2);
   const file1 = readFileSync(resolvedPathToFile1).toString('utf-8');
   const file2 = readFileSync(resolvedPathToFile2).toString('utf-8');
-  const extension = extname(resolvedPathToFile1);
-  const parserFunc = parser(extension);
+  const fileType = extname(resolvedPathToFile1).substring(1);
+  const parser = parserFabric(fileType);
   const formatter = formatterFabric(format);
 
-  const parsedFile1 = parserFunc(file1);
-  const parsedFile2 = parserFunc(file2);
+  const parsedFile1 = parser(file1);
+  const parsedFile2 = parser(file2);
   const diffTree = genDiffTree(parsedFile1, parsedFile2);
 
   return formatter(diffTree);
