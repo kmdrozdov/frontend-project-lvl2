@@ -12,17 +12,17 @@ const formatValue = (value) => {
 
 export default (tree) => {
   const iter = (node, path) => (
-    node.flatMap(([operand, key, value]) => {
-      const currPath = path === '' ? key : `${path}.${key}`;
-      if (Array.isArray(value)) {
-        return iter(value, currPath);
+    node.flatMap(({ name, value, children, operation = ' ' }) => {
+      const currPath = path === '' ? name : `${path}.${name}`;
+      if (children) {
+        return iter(children, currPath);
       }
 
-      if (operand !== ' ') {
+      if (operation !== ' ') {
         return {
           currPath,
           value,
-          action: operand === '+' ? 'added with value' : 'deleted',
+          action: operation === '+' ? 'added with value' : 'deleted',
         };
       }
 
@@ -40,22 +40,22 @@ export default (tree) => {
     },
     {},
   );
-  const result = [];
 
-  for (let i = 0, { length } = Object.keys(preparedObj); i < length; i += 1) {
-    const path = Object.keys(preparedObj)[i];
-    const { action, value } = preparedObj[path];
-    const [firstValue, secondValue] = value.map(formatValue);
-    let preparedValue = '';
+  const result = Object.entries(preparedObj).reduce(
+    (acc, [key, { action, value }]) => {
+      const [firstValue, secondValue] = value.map(formatValue);
+      if (value.length > 1) {
+        return [...acc, `Property '${key}' was ${action} ${firstValue} to ${secondValue}`];
+      }
 
-    if (value.length > 1) {
-      preparedValue = ` ${firstValue} to ${secondValue}`;
-    } else if (value.length && action !== 'deleted') {
-      preparedValue = `: ${firstValue}`;
-    }
+      if (value.length && action !== 'deleted') {
+        return [...acc, `Property '${key}' was ${action}: ${firstValue}`];
+      }
 
-    result.push(`Property '${path}' was ${action}${preparedValue}`);
-  }
+      return [...acc, `Property '${key}' was ${action}`];
+    },
+    [],
+  );
 
   return result.join('\n');
 };

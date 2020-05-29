@@ -1,14 +1,14 @@
 export default (tree) => {
   const iter = (node, path) => (
-    node.flatMap(([operand, key, value]) => {
-      const currPath = path === '' ? key : `${path}.${key}`;
-      if (Array.isArray(value)) {
-        return iter(value, currPath);
+    node.flatMap(({ name, value, children, operation = ' ' }) => {
+      const currPath = path === '' ? name : `${path}.${name}`;
+      if (children) {
+        return iter(children, currPath);
       }
 
-      if (operand !== ' ') {
+      if (operation !== ' ') {
         return {
-          action: operand === '+' ? 'added with value' : 'deleted',
+          action: operation === '+' ? 'added with value' : 'deleted',
           path: currPath,
           value,
         };

@@ -4,29 +4,41 @@ import _ from 'lodash';
 import formatterFabric from './formatter/index.js';
 import parserFabric from './parser.js';
 
-const genDiffTree = (tree1, tree2) => {
-  const mergedKeys = _.uniq([...Object.keys(tree1), ...Object.keys(tree2)]).sort();
+const getDiffTree = (tree1, tree2) => {
+  const treePathNames = _.uniq([...Object.keys(tree1), ...Object.keys(tree2)]).sort();
 
-  return mergedKeys.reduce(
+  return treePathNames.reduce(
     (acc, key) => {
       if (typeof tree1[key] === 'object' && typeof tree2[key] === 'object') {
-        acc.push([' ', key, genDiffTree(tree1[key], tree2[key])]);
-      } else if (tree1[key] === tree2[key]) {
-        acc.push([' ', key, tree1[key]]);
-      } else {
-        if (typeof tree1[key] !== 'undefined') {
-          acc.push(['-', key, tree1[key]]);
-        }
-
-        if (typeof tree2[key] !== 'undefined') {
-          acc.push(['+', key, tree2[key]]);
-        }
+        return [...acc, {
+          name: key,
+          children: getDiffTree(tree1[key], tree2[key]),
+        }];
       }
 
-      return acc;
+      if (tree1[key] === tree2[key]) {
+        return [...acc, {
+          name: key,
+          value: tree1[key],
+        }];
+      }
+
+      return [
+        ...acc,
+        typeof tree1[key] !== 'undefined' ? {
+          operation: '-',
+          name: key,
+          value: tree1[key],
+        } : [],
+        typeof tree2[key] !== 'undefined' ? {
+          operation: '+',
+          name: key,
+          value: tree2[key],
+        } : [],
+      ];
     },
     [],
-  );
+  ).flat();
 };
 
 export default (filepath1, filepath2, format) => {
@@ -41,7 +53,7 @@ export default (filepath1, filepath2, format) => {
 
   const parsedFile1 = parser(file1);
   const parsedFile2 = parser(file2);
-  const diffTree = genDiffTree(parsedFile1, parsedFile2);
+  const diffTree = getDiffTree(parsedFile1, parsedFile2);
 
   return formatter(diffTree);
 };
