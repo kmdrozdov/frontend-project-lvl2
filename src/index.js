@@ -1,39 +1,39 @@
 import { readFileSync } from 'fs';
 import { resolve, extname } from 'path';
 import _ from 'lodash';
-import formatterFabric from './formatter/index.js';
-import parserFabric from './parser.js';
+import formatter from './formatter/index.js';
+import parser from './parser.js';
 
-const getDiffTree = (tree1, tree2) => {
-  const treePathNames = _.uniq([...Object.keys(tree1), ...Object.keys(tree2)]).sort();
+const getDiffTree = (content1, content2) => {
+  const sortedNodeNames = _.uniq([...Object.keys(content1), ...Object.keys(content2)]).sort();
 
-  return treePathNames.reduce(
+  return sortedNodeNames.reduce(
     (acc, key) => {
-      if (typeof tree1[key] === 'object' && typeof tree2[key] === 'object') {
+      if (typeof content1[key] === 'object' && typeof content2[key] === 'object') {
         return [...acc, {
           name: key,
-          children: getDiffTree(tree1[key], tree2[key]),
+          children: getDiffTree(content1[key], content2[key]),
         }];
       }
 
-      if (tree1[key] === tree2[key]) {
+      if (content1[key] === content2[key]) {
         return [...acc, {
           name: key,
-          value: tree1[key],
+          value: content1[key],
         }];
       }
 
       return [
         ...acc,
-        typeof tree1[key] !== 'undefined' ? {
-          operation: '-',
+        typeof content1[key] !== 'undefined' ? {
+          operation: 'deleted',
           name: key,
-          value: tree1[key],
+          value: content1[key],
         } : [],
-        typeof tree2[key] !== 'undefined' ? {
-          operation: '+',
+        typeof content2[key] !== 'undefined' ? {
+          operation: 'added',
           name: key,
-          value: tree2[key],
+          value: content2[key],
         } : [],
       ];
     },
@@ -41,19 +41,19 @@ const getDiffTree = (tree1, tree2) => {
   ).flat();
 };
 
-export default (filepath1, filepath2, format) => {
+export default (filePath1, filePath2, parseFormat) => {
   const currDir = process.cwd();
-  const resolvedPathToFile1 = resolve(currDir, filepath1);
-  const resolvedPathToFile2 = resolve(currDir, filepath2);
-  const file1 = readFileSync(resolvedPathToFile1).toString('utf-8');
-  const file2 = readFileSync(resolvedPathToFile2).toString('utf-8');
-  const fileType = extname(resolvedPathToFile1).substring(1);
-  const parser = parserFabric(fileType);
-  const formatter = formatterFabric(format);
+  const resolvedFilePath1 = resolve(currDir, filePath1);
+  const resolvedFilePath2 = resolve(currDir, filePath2);
+  const content1 = readFileSync(resolvedFilePath1).toString('utf-8');
+  const content2 = readFileSync(resolvedFilePath2).toString('utf-8');
+  const fileType = extname(resolvedFilePath1).substring(1);
+  const parse = parser(fileType);
+  const format = formatter(parseFormat);
 
-  const parsedFile1 = parser(file1);
-  const parsedFile2 = parser(file2);
-  const diffTree = getDiffTree(parsedFile1, parsedFile2);
+  const parsedContent1 = parse(content1);
+  const parsedContent2 = parse(content2);
+  const diffTree = getDiffTree(parsedContent1, parsedContent2);
 
-  return formatter(diffTree);
+  return format(diffTree);
 };
