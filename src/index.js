@@ -4,56 +4,61 @@ import _ from 'lodash';
 import formatter from './formatter/index.js';
 import parser from './parser.js';
 
-const getDiffTree = (content1, content2) => {
-  const sortedNodeNames = _.uniq([...Object.keys(content1), ...Object.keys(content2)]).sort();
+const getSortedNodeNames = (firstContent, secondContent) => (
+  _.union(Object.keys(firstContent), Object.keys(secondContent)).sort()
+);
 
-  return sortedNodeNames.reduce(
-    (acc, key) => {
-      if (typeof content1[key] === 'object' && typeof content2[key] === 'object') {
-        return [...acc, {
-          name: key,
-          children: getDiffTree(content1[key], content2[key]),
-        }];
+const getDiffTree = (firstContent, secondContent) => {
+  const sortedNodeNames = getSortedNodeNames(firstContent, secondContent);
+
+  return sortedNodeNames.map((nodeName) => {
+    const hasNodeInFirstContent = _.has(firstContent, nodeName);
+    const hasNodeInSecondContent = _.has(secondContent, nodeName);
+
+    if (hasNodeInFirstContent && hasNodeInSecondContent) {
+      if (typeof firstContent[nodeName] === 'object' && typeof secondContent[nodeName] === 'object') {
+        return {
+          name: nodeName,
+          children: getDiffTree(firstContent[nodeName], secondContent[nodeName]),
+        };
       }
 
-      if (content1[key] === content2[key]) {
-        return [...acc, {
-          name: key,
-          value: content1[key],
-        }];
+      if (firstContent[nodeName] === secondContent[nodeName]) {
+        return {
+          name: nodeName,
+          value: firstContent[nodeName],
+        };
       }
+    }
 
-      return [
-        ...acc,
-        typeof content1[key] !== 'undefined' ? {
-          operation: 'deleted',
-          name: key,
-          value: content1[key],
-        } : [],
-        typeof content2[key] !== 'undefined' ? {
-          operation: 'added',
-          name: key,
-          value: content2[key],
-        } : [],
-      ];
-    },
-    [],
-  ).flat();
+    return [
+      hasNodeInFirstContent ? {
+        operation: 'deleted',
+        name: nodeName,
+        value: firstContent[nodeName],
+      } : [],
+      hasNodeInSecondContent ? {
+        operation: 'added',
+        name: nodeName,
+        value: secondContent[nodeName],
+      } : [],
+    ];
+  }).flat(2);
 };
 
-export default (filePath1, filePath2, parseFormat) => {
+export default (firstFilePath, secondFilePath, parseFormat) => {
   const currDir = process.cwd();
-  const resolvedFilePath1 = resolve(currDir, filePath1);
-  const resolvedFilePath2 = resolve(currDir, filePath2);
-  const content1 = readFileSync(resolvedFilePath1).toString('utf-8');
-  const content2 = readFileSync(resolvedFilePath2).toString('utf-8');
-  const fileType = extname(resolvedFilePath1).substring(1);
+  const firstResolvedFilePath = resolve(currDir, firstFilePath);
+  const secondResolvedFilePath = resolve(currDir, secondFilePath);
+  const firstContent = readFileSync(firstResolvedFilePath).toString('utf-8');
+  const secondContent = readFileSync(secondResolvedFilePath).toString('utf-8');
+  const fileType = extname(firstResolvedFilePath).substring(1);
   const parse = parser(fileType);
   const format = formatter(parseFormat);
 
-  const parsedContent1 = parse(content1);
-  const parsedContent2 = parse(content2);
-  const diffTree = getDiffTree(parsedContent1, parsedContent2);
+  const firstParsedContent = parse(firstContent);
+  const secondParsedContent = parse(secondContent);
+  const diffTree = getDiffTree(firstParsedContent, secondParsedContent);
 
   return format(diffTree);
 };
