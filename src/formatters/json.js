@@ -4,16 +4,16 @@ export default (tree) => {
       name,
       value,
       children,
-      operation = '',
+      type = '',
     }) => {
       const currPath = path === '' ? name : `${path}.${name}`;
       if (children) {
         return iter(children, currPath);
       }
 
-      if (operation.length > 0) {
+      if (type.length > 0) {
         return {
-          action: operation === 'added' ? 'added with value' : 'deleted',
+          action: type === 'added' ? 'added with value' : 'deleted',
           path: currPath,
           value,
         };

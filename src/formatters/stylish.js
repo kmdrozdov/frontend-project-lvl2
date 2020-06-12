@@ -1,5 +1,5 @@
-const formatOperation = (operation) => {
-  switch (operation) {
+const formatOperation = (type) => {
+  switch (type) {
     case 'added':
       return '+';
     case 'deleted':
@@ -7,7 +7,7 @@ const formatOperation = (operation) => {
     case '':
       return ' ';
     default:
-      throw new Error(`Unknown operation: ${operation}`);
+      throw new Error(`Unknown operation: ${type}`);
   }
 };
 
@@ -19,10 +19,10 @@ const stylish = (tree, indent = 2) => {
         name,
         value,
         children,
-        operation = '',
+        type = '',
       },
     ) => {
-      const formattedOperation = formatOperation(operation);
+      const formattedOperation = formatOperation(type);
       if (children) {
         return [
           ...acc,

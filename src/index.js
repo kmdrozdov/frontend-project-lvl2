@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { resolve, extname } from 'path';
 import _ from 'lodash';
-import formatter from './formatter/index.js';
-import parser from './parser.js';
+import format from './formatters/index.js';
+import parse from './parser.js';
 
 const getSortedNodeNames = (firstContent, secondContent) => (
   _.union(Object.keys(firstContent), Object.keys(secondContent)).sort()
@@ -33,13 +33,13 @@ const getDiffTree = (firstContent, secondContent) => {
 
     return [
       hasNodeInFirstContent ? {
-        operation: 'deleted',
         name: nodeName,
+        type: 'deleted',
         value: firstContent[nodeName],
       } : [],
       hasNodeInSecondContent ? {
-        operation: 'added',
         name: nodeName,
+        type: 'added',
         value: secondContent[nodeName],
       } : [],
     ];
@@ -52,13 +52,12 @@ export default (firstFilePath, secondFilePath, parseFormat) => {
   const secondResolvedFilePath = resolve(currDir, secondFilePath);
   const firstContent = readFileSync(firstResolvedFilePath).toString('utf-8');
   const secondContent = readFileSync(secondResolvedFilePath).toString('utf-8');
-  const fileType = extname(firstResolvedFilePath).substring(1);
-  const parse = parser(fileType);
-  const format = formatter(parseFormat);
+  const firstFileType = extname(firstResolvedFilePath).substring(1);
+  const secondFileType = extname(secondResolvedFilePath).substring(1);
 
-  const firstParsedContent = parse(firstContent);
-  const secondParsedContent = parse(secondContent);
+  const firstParsedContent = parse(firstFileType)(firstContent);
+  const secondParsedContent = parse(secondFileType)(secondContent);
   const diffTree = getDiffTree(firstParsedContent, secondParsedContent);
 
-  return format(diffTree);
+  return format(parseFormat)(diffTree);
 };
