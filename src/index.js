@@ -11,39 +11,51 @@ const getSortedNodeNames = (firstContent, secondContent) => (
 const getDiffTree = (firstContent, secondContent) => {
   const sortedNodeNames = getSortedNodeNames(firstContent, secondContent);
 
-  return sortedNodeNames.map((nodeName) => {
+  return sortedNodeNames.flatMap((nodeName) => {
     const hasNodeInFirstContent = _.has(firstContent, nodeName);
     const hasNodeInSecondContent = _.has(secondContent, nodeName);
 
-    if (hasNodeInFirstContent && hasNodeInSecondContent) {
-      if (typeof firstContent[nodeName] === 'object' && typeof secondContent[nodeName] === 'object') {
-        return {
-          name: nodeName,
-          children: getDiffTree(firstContent[nodeName], secondContent[nodeName]),
-        };
-      }
-
-      if (firstContent[nodeName] === secondContent[nodeName]) {
-        return {
-          name: nodeName,
-          value: firstContent[nodeName],
-        };
-      }
-    }
-
-    return [
-      hasNodeInFirstContent ? {
+    if (hasNodeInFirstContent && !hasNodeInSecondContent) {
+      return {
         name: nodeName,
         type: 'deleted',
         value: firstContent[nodeName],
-      } : [],
-      hasNodeInSecondContent ? {
+      };
+    }
+
+    if (hasNodeInSecondContent && !hasNodeInFirstContent) {
+      return {
         name: nodeName,
         type: 'added',
         value: secondContent[nodeName],
-      } : [],
-    ];
-  }).flat(2);
+      };
+    }
+
+    if (typeof firstContent[nodeName] === 'object' && typeof secondContent[nodeName] === 'object') {
+      return {
+        name: nodeName,
+        type: 'nested',
+        children: getDiffTree(firstContent[nodeName], secondContent[nodeName]),
+      };
+    }
+
+    if (firstContent[nodeName] === secondContent[nodeName]) {
+      return {
+        name: nodeName,
+        type: 'unchanged',
+        value: firstContent[nodeName],
+      };
+    }
+
+    return {
+      name: nodeName,
+      type: 'changed',
+      value: {
+        oldValue: firstContent[nodeName],
+        newValue: secondContent[nodeName],
+      },
+    };
+  });
 };
 
 export default (firstFilePath, secondFilePath, parseFormat) => {

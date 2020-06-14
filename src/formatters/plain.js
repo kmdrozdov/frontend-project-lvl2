@@ -15,52 +15,31 @@ export default (tree) => {
     node.flatMap(({
       name,
       value,
+      type,
       children,
-      type = '',
     }) => {
       const currPath = path === '' ? name : `${path}.${name}`;
-      if (children) {
+      if (type === 'nested') {
         return iter(children, currPath);
       }
 
-      if (type.length > 0) {
-        return {
-          currPath,
-          value,
-          action: type === 'added' ? 'added with value' : 'deleted',
-        };
+      if (type === 'added') {
+        return `Property '${currPath}' was added with value: ${formatValue(value)}`;
+      }
+
+      if (type === 'deleted') {
+        return `Property '${currPath}' was deleted`;
+      }
+
+      if (type === 'changed') {
+        const { oldValue, newValue } = value;
+        return `Property '${currPath}' was changed from ${formatValue(oldValue)} to ${formatValue(newValue)}`;
       }
 
       return [];
     })
   );
-  const flattenedTreeWithFullPaths = iter(tree, '');
-
-  const preparedObj = flattenedTreeWithFullPaths.reduce(
-    (acc, { currPath, action, value }) => {
-      const preparedAction = acc[currPath] ? 'changed from' : action;
-      const preparedValue = acc[currPath] ? [...acc[currPath].value, value] : [value];
-
-      return { ...acc, [currPath]: { action: preparedAction, value: preparedValue } };
-    },
-    {},
-  );
-
-  const result = Object.entries(preparedObj).reduce(
-    (acc, [key, { action, value }]) => {
-      const [firstValue, secondValue] = value.map(formatValue);
-      if (value.length > 1) {
-        return [...acc, `Property '${key}' was ${action} ${firstValue} to ${secondValue}`];
-      }
-
-      if (value.length && action !== 'deleted') {
-        return [...acc, `Property '${key}' was ${action}: ${firstValue}`];
-      }
-
-      return [...acc, `Property '${key}' was ${action}`];
-    },
-    [],
-  );
+  const result = iter(tree, '');
 
   return result.join('\n');
 };

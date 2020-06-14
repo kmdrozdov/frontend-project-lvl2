@@ -4,47 +4,61 @@ const formatOperation = (type) => {
       return '+';
     case 'deleted':
       return '-';
-    case '':
+    case 'changed':
+    case 'unchanged':
+    case 'nested':
       return ' ';
     default:
       throw new Error(`Unknown operation: ${type}`);
   }
 };
 
+
 const stylish = (tree, indent = 2) => {
+  const formatValue = (value) => {
+    if (typeof value === 'object') {
+      const [key, val] = Object.entries(value)[0];
+      const node = {
+        name: key,
+        type: 'unchanged',
+        value: val,
+      };
+
+      return stylish([node], indent + 4);
+    }
+
+    return value;
+  };
+
   const styledTree = tree.reduce(
     (
       acc,
       {
         name,
         value,
+        type,
         children,
-        type = '',
       },
     ) => {
       const formattedOperation = formatOperation(type);
-      if (children) {
+
+      if (type === 'changed') {
+        const { oldValue, newValue } = value;
+        return [
+          ...acc,
+          `${' '.repeat(indent)}- ${name}: ${formatValue(oldValue)}`,
+          `${' '.repeat(indent)}+ ${name}: ${formatValue(newValue)}`,
+        ];
+      }
+
+      if (type === 'nested') {
         return [
           ...acc,
           `${' '.repeat(indent)}${formattedOperation} ${name}: ${stylish(children, indent + 4)}`,
         ];
       }
 
-      if (typeof value === 'object') {
-        const [k, v] = Object.entries(value)[0];
-        const node = {
-          operation: '',
-          name: k,
-          value: v,
-        };
-
-        return [
-          ...acc,
-          `${' '.repeat(indent)}${formattedOperation} ${name}: ${stylish([node], indent + 4)}`,
-        ];
-      }
-
-      return [...acc, `${' '.repeat(indent)}${formattedOperation} ${name}: ${value}`];
+      return [...acc, `${' '.repeat(indent)}${formattedOperation} ${name}: ${formatValue(value)}`];
     },
     [],
   );
