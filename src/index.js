@@ -15,7 +15,7 @@ const getDiffTree = (firstContent, secondContent) => {
     const hasNodeInFirstContent = _.has(firstContent, nodeName);
     const hasNodeInSecondContent = _.has(secondContent, nodeName);
 
-    if (hasNodeInFirstContent && !hasNodeInSecondContent) {
+    if (!hasNodeInSecondContent) {
       return {
         name: nodeName,
         type: 'deleted',
@@ -23,7 +23,7 @@ const getDiffTree = (firstContent, secondContent) => {
       };
     }
 
-    if (hasNodeInSecondContent && !hasNodeInFirstContent) {
+    if (!hasNodeInFirstContent) {
       return {
         name: nodeName,
         type: 'added',
@@ -50,10 +50,8 @@ const getDiffTree = (firstContent, secondContent) => {
     return {
       name: nodeName,
       type: 'changed',
-      value: {
-        oldValue: firstContent[nodeName],
-        newValue: secondContent[nodeName],
-      },
+      oldValue: firstContent[nodeName],
+      newValue: secondContent[nodeName],
     };
   });
 };

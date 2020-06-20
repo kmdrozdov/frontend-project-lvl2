@@ -1,18 +1,4 @@
-const formatOperation = (type) => {
-  switch (type) {
-    case 'added':
-      return '+';
-    case 'deleted':
-      return '-';
-    case 'changed':
-    case 'unchanged':
-    case 'nested':
-      return ' ';
-    default:
-      throw new Error(`Unknown operation: ${type}`);
-  }
-};
-
+const formatStyledNode = (indent, operation, name, value) => `${' '.repeat(indent)}${operation} ${name}: ${value}`;
 
 const stylish = (tree, indent = 2) => {
   const formatValue = (value) => {
@@ -30,37 +16,33 @@ const stylish = (tree, indent = 2) => {
     return value;
   };
 
-  const styledTree = tree.reduce(
-    (
-      acc,
-      {
-        name,
-        value,
-        type,
-        children,
-      },
-    ) => {
-      const formattedOperation = formatOperation(type);
-
-      if (type === 'changed') {
-        const { oldValue, newValue } = value;
-        return [
-          ...acc,
-          `${' '.repeat(indent)}- ${name}: ${formatValue(oldValue)}`,
-          `${' '.repeat(indent)}+ ${name}: ${formatValue(newValue)}`,
-        ];
+  const styledTree = tree.flatMap(
+    ({
+      name,
+      value,
+      type,
+      children,
+      oldValue,
+      newValue,
+    }) => {
+      switch (type) {
+        case 'changed':
+          return [
+            formatStyledNode(indent, '-', name, formatValue(oldValue)),
+            formatStyledNode(indent, '+', name, formatValue(newValue)),
+          ];
+        case 'nested':
+          return formatStyledNode(indent, ' ', name, stylish(children, indent + 4));
+        case 'unchanged':
+          return formatStyledNode(indent, ' ', name, formatValue(value));
+        case 'added':
+          return formatStyledNode(indent, '+', name, formatValue(value));
+        case 'deleted':
+          return formatStyledNode(indent, '-', name, formatValue(value));
+        default:
+          throw new Error(`Unknown type: ${type}`);
       }
-
-      if (type === 'nested') {
-        return [
-          ...acc,
-          `${' '.repeat(indent)}${formattedOperation} ${name}: ${stylish(children, indent + 4)}`,
-        ];
-      }
-
-      return [...acc, `${' '.repeat(indent)}${formattedOperation} ${name}: ${formatValue(value)}`];
     },
-    [],
   );
 
   return `{\n${styledTree.join('\n')}\n${' '.repeat(indent - 2)}}`;

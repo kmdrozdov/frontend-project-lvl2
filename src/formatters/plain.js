@@ -17,26 +17,22 @@ export default (tree) => {
       value,
       type,
       children,
+      oldValue,
+      newValue,
     }) => {
       const currPath = path === '' ? name : `${path}.${name}`;
-      if (type === 'nested') {
-        return iter(children, currPath);
+      switch (type) {
+        case 'nested':
+          return iter(children, currPath);
+        case 'added':
+          return `Property '${currPath}' was added with value: ${formatValue(value)}`;
+        case 'deleted':
+          return `Property '${currPath}' was deleted`;
+        case 'changed':
+          return `Property '${currPath}' was changed from ${formatValue(oldValue)} to ${formatValue(newValue)}`;
+        default:
+          return [];
       }
-
-      if (type === 'added') {
-        return `Property '${currPath}' was added with value: ${formatValue(value)}`;
-      }
-
-      if (type === 'deleted') {
-        return `Property '${currPath}' was deleted`;
-      }
-
-      if (type === 'changed') {
-        const { oldValue, newValue } = value;
-        return `Property '${currPath}' was changed from ${formatValue(oldValue)} to ${formatValue(newValue)}`;
-      }
-
-      return [];
     })
   );
   const result = iter(tree, '');
