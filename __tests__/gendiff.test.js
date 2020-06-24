@@ -19,13 +19,12 @@ const cases = cartesian(
 describe('Main cases', () => {
   test.each(cases)(
     'Case for "%s" format with "%s" and "%s" files',
-    (format, beforeFileName, afterFileName) => {
-      const beforeFile = getFixturesPath(beforeFileName);
-      const afterFile = getFixturesPath(afterFileName);
+    (format, firstFileName, secondFileName) => {
+      const firstFilePath = getFixturesPath(firstFileName);
+      const secondFilePath = getFixturesPath(secondFileName);
       const resultContent = readFile(`${format}_result.txt`);
-      const result = format === 'json' ? JSON.parse(resultContent) : resultContent;
 
-      expect(genDiff(beforeFile, afterFile, format)).toEqual(result);
+      expect(genDiff(firstFilePath, secondFilePath, format)).toEqual(resultContent);
     },
   );
 });

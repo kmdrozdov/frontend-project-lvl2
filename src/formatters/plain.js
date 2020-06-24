@@ -30,10 +30,12 @@ export default (tree) => {
           return `Property '${currPath}' was deleted`;
         case 'changed':
           return `Property '${currPath}' was changed from ${formatValue(oldValue)} to ${formatValue(newValue)}`;
+        case 'unchanged':
+          return '';
         default:
-          return [];
+          throw new Error(`Unknown type: ${type}`);
       }
-    })
+    }).filter((plainNode) => plainNode !== '')
   );
   const result = iter(tree, '');
 
