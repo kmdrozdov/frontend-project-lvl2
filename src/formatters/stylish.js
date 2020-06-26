@@ -1,6 +1,6 @@
 const getNodeIndent = (depth) => {
-  const stylishIndent = 2;
-  return stylishIndent + (depth * stylishIndent * 2);
+  const indentSize = 2;
+  return indentSize + (depth * indentSize * 2);
 };
 
 const formatStyledNode = (indent, operation, name, value) => `${' '.repeat(indent)}${operation} ${name}: ${value}`;
