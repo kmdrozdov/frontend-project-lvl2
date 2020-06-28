@@ -31,11 +31,11 @@ export default (tree) => {
         case 'changed':
           return `Property '${currPath}' was changed from ${formatValue(oldValue)} to ${formatValue(newValue)}`;
         case 'unchanged':
-          return '';
+          return null;
         default:
           throw new Error(`Unknown type: ${type}`);
       }
-    }).filter((plainNode) => plainNode !== '')
+    }).filter(Boolean)
   );
   const result = iter(tree, '');
 
